@@ -138,7 +138,7 @@ export const GetResetPasswordPage = async (req, res) => {
   // res.render("resetPassword", { token });
 
   const resetPasswordEndpoint = process.env.RESET_PASSWORD_ENDPOINT;  // Get the endpoint from .env
-  res.render("reset-password", { resetPasswordEndpoint },{token});
+  res.render("resetPassword", { resetPasswordEndpoint },{token});
 };
 
 
