@@ -9,11 +9,26 @@ dotenvConfig();
 const app = express();
 const port = process.env.PORT;
 const host = process.env.HOST;
+
+
+const allowedOrigins = [
+  "http://localhost:3000", // Local development
+  "https://movie-application-8clpbg267-7985575255s-projects.vercel.app" // Your Vercel frontend
+];
+
+// CORS configuration
 const corsOptions = {
-    origin: "*", // Allow all origins
-    credentials: true, // Allow cookies and credentials
+  origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true); 
+      } else {
+          callback(new Error("Not allowed by CORS")); 
+      }
+  },
+  credentials: true, 
 };
-app.use(cors(corsOptions))
+
+app.use(cors(corsOptions));
 
 
 app.set("view engine", "pug");

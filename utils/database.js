@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { config as dotenvConfig } from 'dotenv';
 
-// Load environment variables
+
 dotenvConfig({ path: '.env' });
 
 const clientOptions = {
