@@ -9,12 +9,12 @@ dotenvConfig();
 const app = express();
 const port = process.env.PORT;
 const host = process.env.HOST;
-app.use(
-  cors({
-    origin: "http://localhost:3000", // Corrected origin with double slashes
+const corsOptions = {
+    origin: "*", // Allow all origins
     credentials: true, // Allow cookies and credentials
-  })
-);
+};
+app.use(cors(corsOptions))
+
 
 app.set("view engine", "pug");
 app.set("views", "./views");
