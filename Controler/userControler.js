@@ -134,8 +134,11 @@ export const ForgetPassword = async (req, res) => {
 export const GetResetPasswordPage = async (req, res) => {
   const { token } = req.query;
 
-  console.log("get resett password till working");
-  res.render("resetPassword", { token });
+  // console.log("get resett password till working");
+  // res.render("resetPassword", { token });
+
+  const resetPasswordEndpoint = process.env.RESET_PASSWORD_ENDPOINT;  // Get the endpoint from .env
+  res.render("reset-password", { resetPasswordEndpoint },{token});
 };
 
 
