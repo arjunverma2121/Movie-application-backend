@@ -10,26 +10,17 @@ const app = express();
 const port = process.env.PORT;
 const host = process.env.HOST;
 
-
 const allowedOrigins = [
-  "http://localhost:3000", // Local development
-  "https://movie-application-8clpbg267-7985575255s-projects.vercel.app" // Your Vercel frontend
+  "http://localhost:3000", 
+  "https://movie-application-8clpbg267-7985575255s-projects.vercel.app", 
+  "http://192.168.252.10:5000",
+  "http://192.168.252.10:3000"
 ];
 
-// CORS configuration
-const corsOptions = {
-  origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-          callback(null, true); 
-      } else {
-          callback(new Error("Not allowed by CORS")); 
-      }
-  },
-  credentials: true, 
-};
-
-app.use(cors(corsOptions));
-
+app.use(cors({
+  origin: (origin, callback) => callback(null, allowedOrigins.includes(origin) || !origin),
+  credentials: true
+}));
 
 app.set("view engine", "pug");
 app.set("views", "./views");
@@ -46,7 +37,7 @@ app.use("/api/user", userRoute);
     await connectToDatabase();
     console.log("Database connection successful!");
 
-    app.listen( port, () => {
+    app.listen(port, () => {
       console.log(`Server is running on port ${port}`);
     });
   } catch (error) {

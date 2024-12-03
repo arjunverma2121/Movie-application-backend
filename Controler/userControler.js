@@ -59,7 +59,12 @@ export const Login = async (req, res) => {
         sameSite: "strict",
         expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
       })
-      .json({ message: `Welcome back ${user.fullName},`, success: true, user , "token":token});
+      .json({
+        message: `Welcome back ${user.fullName},`,
+        success: true,
+        user,
+        token: token,
+      });
   } catch (error) {
     console.error("Login error:", error);
     return res
@@ -103,6 +108,7 @@ export const ForgetPassword = async (req, res) => {
 
     // Send the reset link via email
     const resetURL = `${process.env.END_POINT}/reset-password?token=${resetToken}`;
+     
     await transporter.sendMail({
       to: email,
       subject: "Password Reset",
@@ -115,6 +121,7 @@ export const ForgetPassword = async (req, res) => {
   </div>
 `,
     });
+    
 
     res.status(200).json({
       message: "Password reset link sent to your email.",
@@ -128,21 +135,15 @@ export const ForgetPassword = async (req, res) => {
   }
 };
 
-
-
-
 export const GetResetPasswordPage = async (req, res) => {
   const { token } = req.query;
 
   // console.log("get resett password till working");
   // res.render("resetPassword", { token });
 
-  const resetPasswordEndpoint = process.env.RESET_PASSWORD_ENDPOINT;  // Get the endpoint from .env
-  res.render("resetPassword", { resetPasswordEndpoint },{token});
+  const resetPasswordEndpoint = process.env.RESET_PASSWORD_ENDPOINT; // Get the endpoint from .env
+  res.render("resetPassword", { resetPasswordEndpoint }, { token });
 };
-
-
-
 
 export const ResetPassword = async (req, res) => {
   const { token, password, confirmPassword } = req.body;
@@ -174,4 +175,3 @@ export const ResetPassword = async (req, res) => {
     res.status(500).json({ message: "Server error. Please try again." });
   }
 };
-
