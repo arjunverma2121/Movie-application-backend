@@ -15,7 +15,8 @@ const allowedOrigins = [
   "https://movie-application-8clpbg267-7985575255s-projects.vercel.app",
   "http://192.168.252.10:5000",
   "http://192.168.252.10:3000",
-  "https://movie-application-backend-k15e.onrender.com"
+  "https://movie-application-backend-k15e.onrender.com",
+  "https://movie-application-gycn.onrender.com",
 ];
 
 app.use(
