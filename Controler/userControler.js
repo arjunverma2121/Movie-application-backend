@@ -1,5 +1,6 @@
 import User from "../Model/userModel.js";
-import bcryptjs from "bcryptjs";
+// import bcryptjs from "bcryptjs";
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { configDotenv } from "dotenv";
 import crypto from "crypto";
@@ -19,9 +20,10 @@ export const Register = async (req, res) => {
         success: false,
       });
     }
-    const hashedPassword = await bcryptjs.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password,10);
     console.log("Hashed Password:", hashedPassword);
-    await User.create({ fullName, email, password: hashedPassword });
+
+    await User.create({ fullName, email, password:hashedPassword});
     return res
       .status(201)
       .json({ message: "Account created succesfully.", success: true });
@@ -33,33 +35,19 @@ configDotenv();
 export const Login = async (req, res) => {
   try {
     const { email, password } = req.body;
+
     if (!email || !password) {
-      return res.status(401).json({ message: "Invalid data", success: false });
-    }
-    console.log("now start find ");
-    const user = await User.findOne({ email });
-    if (!user) {
-      console.log("user is not there");
       return res
-        .status(401)
-        .json({ message: "Invalid eemail or password", success: false });
+        .status(400)
+        .json({ message: "Email and password are required.", success: false });
     }
 
-    try {
-      const isMatch = await bcryptjs.compare(password, user.password);
-      console.log("Plain Password:", password);
-      console.log("Hashed Password from DB:", user.password);
-      console.log("Password Match Result:", isMatch);
-      if (!isMatch) {
-        return res
-          .status(401)
-          .json({ message: "Invalid Email or password", success: false });
-      }
-    } catch (error) {
-      console.error("Error comparing passwords:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error", success: false });
+    const user = await User.findOne({ email });
+    console.log(user)
+   const isMatch = await bcrypt.compare(password, user.password);
+    console.log("Password Match:", isMatch);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid email or password", success: false });
     }
 
     const token = jwt.sign({ userId: user._id }, process.env.secret, {
@@ -74,16 +62,16 @@ export const Login = async (req, res) => {
         expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
       })
       .json({
-        message: `Welcome back ${user.fullName},`,
+        message: `Welcome back, ${user.fullName}!`,
         success: true,
         user,
-        token: token,
+        token,
       });
   } catch (error) {
     console.error("Login error:", error);
     return res
       .status(500)
-      .json({ message: "Internal server error", success: false });
+      .json({ message: "Internal server error.", success: false });
   }
 };
 
