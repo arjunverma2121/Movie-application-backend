@@ -9,26 +9,33 @@ import nodemailer from "nodemailer";
 export const Register = async (req, res) => {
   try {
     const { fullName, email, password } = req.body;
+
     if (!fullName || !email || !password) {
-      return res.status(401).json({ message: "Invalid data", success: false });
+      return res.status(400).json({ message: "Invalid data", success: false });
     }
 
-    const user = await User.findOne({ email });
-    if (user) {
-      return res.status(401).json({
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(409).json({
         message: "This email is already used",
         success: false,
       });
     }
-    const hashedPassword = await bcrypt.hash(password,10);
-    console.log("Hashed Password:", hashedPassword);
 
-    await User.create({ fullName, email, password:hashedPassword});
+    const newUser = new User({ fullName, email, password });
+    await newUser.save();
+
     return res
       .status(201)
-      .json({ message: "Account created succesfully.", success: true });
-  } catch (error) {}
+      .json({ message: "Account created successfully.", success: true });
+  } catch (error) {
+    console.error("Registration error:", error);
+    return res
+      .status(500)
+      .json({ message: "Internal server error.", success: false });
+  }
 };
+
 
 configDotenv();
 
@@ -43,11 +50,17 @@ export const Login = async (req, res) => {
     }
 
     const user = await User.findOne({ email });
-    console.log(user)
-   const isMatch = await bcrypt.compare(password, user.password);
-    console.log("Password Match:", isMatch);
+    if (!user) {
+      return res
+        .status(401)
+        .json({ message: "Invalid email or password", success: false });
+    }
+
+    const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid email or password", success: false });
+      return res
+        .status(401)
+        .json({ message: "Invalid email or password", success: false });
     }
 
     const token = jwt.sign({ userId: user._id }, process.env.secret, {
@@ -74,6 +87,7 @@ export const Login = async (req, res) => {
       .json({ message: "Internal server error.", success: false });
   }
 };
+
 
 export const Logout = async (req, res) => {
   return res
