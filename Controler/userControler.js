@@ -19,8 +19,8 @@ export const Register = async (req, res) => {
         success: false,
       });
     }
-    const hashedPassword = await bcryptjs.hash(password, 16);
-
+    const hashedPassword = await bcryptjs.hash(password, 10);
+    console.log("Hashed Password:", hashedPassword);
     await User.create({ fullName, email, password: hashedPassword });
     return res
       .status(201)
@@ -36,18 +36,32 @@ export const Login = async (req, res) => {
     if (!email || !password) {
       return res.status(401).json({ message: "Invalid data", success: false });
     }
+    console.log("now start find ");
     const user = await User.findOne({ email });
     if (!user) {
+      console.log("user is not there");
       return res
         .status(401)
-        .json({ message: "Invalid email or password", success: false });
+        .json({ message: "Invalid eemail or password", success: false });
     }
-    const isMatch = await bcryptjs.compare(password, user.password);
-    if (!isMatch) {
+
+    try {
+      const isMatch = await bcryptjs.compare(password, user.password);
+      console.log("Plain Password:", password);
+      console.log("Hashed Password from DB:", user.password);
+      console.log("Password Match Result:", isMatch);
+      if (!isMatch) {
+        return res
+          .status(401)
+          .json({ message: "Invalid Email or password", success: false });
+      }
+    } catch (error) {
+      console.error("Error comparing passwords:", error);
       return res
-        .status(401)
-        .json({ message: "Invalid email or password", success: false });
+        .status(500)
+        .json({ message: "Internal server error", success: false });
     }
+
     const token = jwt.sign({ userId: user._id }, process.env.secret, {
       expiresIn: "1d",
     });
